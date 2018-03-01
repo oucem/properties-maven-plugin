@@ -46,6 +46,7 @@ import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugins.annotations.LifecyclePhase;
 import org.apache.maven.plugins.annotations.Mojo;
+import org.apache.maven.plugins.annotations.Parameter;
 
 /**
  * Writes project properties to a file.
@@ -57,11 +58,27 @@ import org.apache.maven.plugins.annotations.Mojo;
 public class WriteProjectProperties
     extends AbstractWritePropertiesMojo
 {
+	
+    /**
+     * The system properties to set.
+     */
+    @Parameter( required = true )
+    private Properties properties;
+    
     /** {@inheritDoc} */
     public void execute()
         throws MojoExecutionException, MojoFailureException
     {
         validateOutputFile();
+        
+        if ( !properties.isEmpty() )
+        {	
+            getLog().debug( "No system properties found" );
+
+            writeProperties( getSpesifiedProperties(), getOutputFile() );
+            return;
+        }
+        
         Properties projProperties = new Properties();
         projProperties.putAll( getProject().getProperties() );
 
@@ -82,4 +99,22 @@ public class WriteProjectProperties
 
         writeProperties( projProperties, getOutputFile() );
     }
+    
+    
+    private Properties getSpesifiedProperties() {
+   	 
+   	 Properties specificProperties = new Properties();
+        getLog().debug( "Setting system properties:" );
+
+        for ( Enumeration<?> propertyNames = properties.propertyNames(); propertyNames.hasMoreElements(); )
+        {
+            String propertyName = propertyNames.nextElement().toString();
+            String propertyValue = properties.getProperty( propertyName );
+            getLog().debug( "- " + propertyName + " = " + propertyValue );
+            specificProperties.setProperty(propertyName, propertyValue);
+        }
+        getLog().info( "Set " + specificProperties.size() + " system " + ( specificProperties.size() > 1 ? "properties" : "property" ) );
+        
+        return specificProperties;
+   }
 }
