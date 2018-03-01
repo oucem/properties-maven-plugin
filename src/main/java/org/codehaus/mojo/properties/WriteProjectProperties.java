@@ -62,7 +62,7 @@ public class WriteProjectProperties
     /**
      * The system properties to set.
      */
-    @Parameter( required = true )
+    @Parameter( required = false )
     private Properties properties;
     
     /** {@inheritDoc} */
